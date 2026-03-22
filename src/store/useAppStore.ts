@@ -42,6 +42,11 @@ type AppState = {
     postageCostPence: number;
     notes: string;
   }) => void;
+  replaceState: (state: {
+    inventory: InventoryItem[];
+    expenses: ExpenseItem[];
+    sales: SaleItem[];
+  }) => void;
 };
 
 const defaultState = {
@@ -161,5 +166,13 @@ export const useAppStore = create<AppState>((set, get) => ({
     const sales = [sale, ...get().sales];
     persistState(inventory, expenses, sales);
     set({ inventory, sales });
+  },
+  replaceState: (state) => {
+    persistState(state.inventory, state.expenses, state.sales);
+    set({
+      inventory: state.inventory,
+      expenses: state.expenses,
+      sales: state.sales,
+    });
   },
 }));
