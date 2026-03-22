@@ -1,4 +1,5 @@
 import { NavLink, Outlet } from "react-router-dom";
+import { useActivationStore } from "../store/useActivationStore";
 
 const navItems = [
   { to: "/dashboard", label: "Dashboard" },
@@ -12,6 +13,8 @@ const navItems = [
 ];
 
 export function AppLayout() {
+  const clearActivation = useActivationStore((state) => state.clearActivation);
+
   return (
     <div className="min-h-screen">
       <div className="mx-auto flex min-h-screen max-w-7xl flex-col px-4 py-4 md:px-6 md:py-6">
@@ -29,9 +32,17 @@ export function AppLayout() {
                 around Etsy discovery and PDF-based onboarding.
               </p>
             </div>
-            <div className="rounded-3xl bg-stone-900 px-4 py-3 text-sm text-stone-100">
-              Activation and storage wiring comes next. This scaffold locks the
-              app structure and core screens first.
+            <div className="flex items-start gap-3">
+              <div className="rounded-3xl bg-stone-900 px-4 py-3 text-sm text-stone-100">
+                Activation is now persisted locally. Data services come next.
+              </div>
+              <button
+                type="button"
+                onClick={clearActivation}
+                className="rounded-3xl border border-stone-300 bg-white px-4 py-3 text-sm font-medium text-stone-700"
+              >
+                Reset activation
+              </button>
             </div>
           </div>
         </header>

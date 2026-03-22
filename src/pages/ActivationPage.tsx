@@ -1,4 +1,32 @@
+import { FormEvent, useState } from "react";
+import { Navigate, useLocation } from "react-router-dom";
+import {
+  isActivationCodeFormatValid,
+  normalizeActivationCode,
+} from "../lib/activation";
+import { useActivationStore } from "../store/useActivationStore";
+
 export function ActivationPage() {
+  const location = useLocation();
+  const activation = useActivationStore((state) => state.activation);
+  const status = useActivationStore((state) => state.status);
+  const error = useActivationStore((state) => state.error);
+  const activate = useActivationStore((state) => state.activate);
+  const [code, setCode] = useState("");
+
+  if (activation) {
+    const from = location.state?.from;
+    return <Navigate to={typeof from === "string" ? from : "/dashboard"} replace />;
+  }
+
+  const normalizedCode = normalizeActivationCode(code);
+  const isValid = isActivationCodeFormatValid(normalizedCode);
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    await activate(normalizedCode);
+  }
+
   return (
     <main className="min-h-screen bg-stone-950 px-4 py-6 text-stone-50 md:px-6">
       <div className="mx-auto grid min-h-[calc(100vh-3rem)] max-w-6xl gap-6 rounded-[32px] bg-[linear-gradient(135deg,#22170d_0%,#111111_55%,#1f1208_100%)] p-6 shadow-[0_24px_80px_rgba(0,0,0,0.34)] lg:grid-cols-[1.15fr_0.85fr] lg:p-10">
@@ -39,20 +67,32 @@ export function ActivationPage() {
           <p className="text-sm font-medium text-stone-300">
             Enter activation code
           </p>
-          <form className="mt-4 grid gap-4">
+          <form className="mt-4 grid gap-4" onSubmit={handleSubmit}>
             <label className="grid gap-2">
               <span className="text-sm text-stone-300">Code</span>
               <input
                 type="text"
                 placeholder="RSLR-XXXX-XXXX"
+                value={code}
+                onChange={(event) => setCode(event.target.value)}
                 className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-base outline-none placeholder:text-stone-500"
               />
             </label>
+            <div className="rounded-2xl bg-black/20 px-4 py-3 text-sm text-stone-300">
+              Demo codes for local development: `RSLR-2026-START`,
+              `RSLR-DEMO-0001`, `RSLR-ETSY-TEST`
+            </div>
+            {error ? (
+              <div className="rounded-2xl border border-rose-400/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
+                {error}
+              </div>
+            ) : null}
             <button
               type="submit"
+              disabled={!isValid || status === "activating"}
               className="rounded-2xl bg-amber-300 px-4 py-3 font-semibold text-stone-950 transition hover:bg-amber-200"
             >
-              Activate app
+              {status === "activating" ? "Activating..." : "Activate app"}
             </button>
           </form>
 
