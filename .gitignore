@@ -32,3 +32,4 @@ test-results/
 # Misc
 *.log
 npm-debug.log*
+*.tsbuildinfo

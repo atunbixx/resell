@@ -1,39 +1,47 @@
-# Reseller Tracker PWA
+# Reseller Tracker
 
-Inventory, sales & profit tracker for eBay, Vinted & Depop resellers.
+Inventory, sales, and profit tracking for eBay, Vinted, and Depop resellers.
 
-## Overview
+## Positioning
 
-A one-time-purchase Progressive Web App for UK resellers. Track inventory, log sales, auto-calculate profit after platform fees, and export tax summaries.
+This repo is for a lean V1 PWA optimized for:
 
-## Tech Stack
+- fast launch
+- offline-first usage
+- low support overhead
+- Etsy-driven discovery with PDF-based onboarding
 
-- **Framework:** Vite 6 + React 19 + TypeScript
-- **Styling:** Tailwind CSS v4
-- **Database:** SQLite (OPFS + IndexedDB fallback)
-- **State:** Zustand
-- **Charts:** Recharts
-- **Routing:** React Router v7
-- **License:** Vercel Edge Function + Lemon Squeezy (JWT-signed)
-- **Monitoring:** Sentry
-- **Testing:** Vitest + Playwright
+The product is intentionally narrow. It is not trying to solve sync, collaboration, or complex licensing in V1.
 
-## Features (V1)
+## Planned Stack
 
-- Inventory tracker with photo capture
-- Sales logger with auto net profit calculation
-- Platform fee presets (eBay 12.8%, Vinted 5%, Depop 10%)
-- Dashboard with charts and platform breakdown
-- Monthly statistics and tax year summary
-- Expenditures tracking
-- CSV export and manual backup/restore
-- Fully offline via SQLite + Service Worker
-- JWT-signed activation code (1 device per key)
+- Vite + React + TypeScript
+- Tailwind CSS
+- React Router
+- Zustand
+- SQLite with browser-compatible fallback
+- Minimal activation endpoint
+
+## Lean V1 Features
+
+- activation screen
+- inventory tracking
+- mark as sold flow with profit calculation
+- expenditures tracking
+- dashboard and monthly statistics
+- tax summary
+- CSV export
+- manual backup and restore
+- constrained photo support
 
 ## Documentation
 
-See docs/ folder for the full technical specification.
+Primary working spec:
+
+- `docs/ResellTracker_V1_Lean_Spec.md`
+
+Older drafts are kept in `docs/` for reference only.
 
 ## License
 
-Proprietary - All rights reserved.
+Proprietary. All rights reserved.
