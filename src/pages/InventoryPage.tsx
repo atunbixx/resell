@@ -1,27 +1,12 @@
 import { PageShell } from "../ui/PageShell";
-
-const items = [
-  {
-    title: "Nike windbreaker",
-    status: "Listed",
-    cost: "£12.00",
-    platform: "Vinted",
-  },
-  {
-    title: "Sony Walkman WM-FX",
-    status: "Sold",
-    cost: "£9.50",
-    platform: "eBay",
-  },
-  {
-    title: "Levi's 501 jeans",
-    status: "Unlisted",
-    cost: "£7.00",
-    platform: "Depop",
-  },
-];
+import { formatCurrency } from "../lib/sampleData";
+import { useAppStore } from "../store/useAppStore";
+import { useNavigate } from "react-router-dom";
 
 export function InventoryPage() {
+  const navigate = useNavigate();
+  const items = useAppStore((state) => state.inventory);
+
   return (
     <PageShell
       eyebrow="Inventory"
@@ -51,7 +36,7 @@ export function InventoryPage() {
       <div className="mt-6 grid gap-3">
         {items.map((item) => (
           <article
-            key={item.title}
+            key={item.id}
             className="grid gap-3 rounded-[24px] border border-stone-200 bg-stone-50 p-4 md:grid-cols-[1fr_auto_auto_auto]"
           >
             <div>
@@ -59,13 +44,18 @@ export function InventoryPage() {
                 {item.title}
               </h3>
               <p className="mt-1 text-sm text-stone-600">
-                Cost {item.cost} · {item.platform}
+                Cost {formatCurrency(item.costPence)} · {item.platform}
               </p>
             </div>
             <span className="rounded-full bg-white px-3 py-2 text-sm text-stone-700">
               {item.status}
             </span>
-            <button className="rounded-full bg-stone-900 px-4 py-2 text-sm font-medium text-white">
+            <button
+              type="button"
+              onClick={() => navigate(`/sales?itemId=${item.id}`)}
+              disabled={item.status === "Sold"}
+              className="rounded-full bg-stone-900 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
+            >
               Mark sold
             </button>
             <button className="rounded-full bg-white px-4 py-2 text-sm font-medium text-stone-700">

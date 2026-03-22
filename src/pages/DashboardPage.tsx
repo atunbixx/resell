@@ -1,7 +1,19 @@
 import { PageShell } from "../ui/PageShell";
 import { StatCard } from "../ui/StatCard";
+import { formatCurrency } from "../lib/sampleData";
+import { useAppStore } from "../store/useAppStore";
 
 export function DashboardPage() {
+  const inventory = useAppStore((state) => state.inventory);
+  const expenses = useAppStore((state) => state.expenses);
+  const sales = useAppStore((state) => state.sales);
+  const inventoryCount = inventory.filter((item) => item.status !== "Sold").length;
+  const totalSpent = inventory.reduce((sum, item) => sum + item.costPence, 0);
+  const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amountPence, 0);
+  const totalRevenue = sales.reduce((sum, sale) => sum + sale.salePricePence, 0);
+  const totalProfit =
+    sales.reduce((sum, sale) => sum + sale.profitPence, 0) - totalExpenses;
+
   return (
     <PageShell
       eyebrow="Dashboard"
@@ -9,10 +21,14 @@ export function DashboardPage() {
       description="The landing screen should answer the only questions that matter quickly: how much stock you have, how much you spent, how much you sold, and whether the month is improving."
     >
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Inventory" value="128" note="22 listed this month" />
-        <StatCard label="Spent" value="£1,482" note="Buying pace is steady" />
-        <StatCard label="Revenue" value="£3,960" note="Across 3 platforms" />
-        <StatCard label="Profit" value="£1,274" note="Up 14% vs last month" />
+        <StatCard
+          label="Inventory"
+          value={String(inventoryCount)}
+          note={`${inventory.filter((item) => item.status === "Listed").length} listed right now`}
+        />
+        <StatCard label="Spent" value={formatCurrency(totalSpent)} note="Purchase costs only" />
+        <StatCard label="Revenue" value={formatCurrency(totalRevenue)} note={`${sales.length} sales recorded`} />
+        <StatCard label="Profit" value={formatCurrency(totalProfit)} note="Sales profit less operating expenses" />
       </div>
 
       <div className="mt-6 grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
@@ -21,16 +37,12 @@ export function DashboardPage() {
             Recent activity
           </p>
           <div className="mt-4 grid gap-3">
-            {[
-              "Vintage denim jacket added for £14.00",
-              "Sony Walkman sold on eBay for £52.00",
-              "Packaging expense logged for £8.50",
-            ].map((entry) => (
+            {inventory.map((item) => (
               <div
-                key={entry}
+                key={item.id}
                 className="rounded-2xl border border-white/60 bg-white/70 px-4 py-3 text-sm text-stone-700"
               >
-                {entry}
+                {item.title} · {item.status} · {formatCurrency(item.costPence)}
               </div>
             ))}
           </div>
