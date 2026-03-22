@@ -107,7 +107,11 @@ export function InventoryPage() {
             >
               Mark sold
             </button>
-            <button className="rounded-full bg-white px-4 py-2 text-sm font-medium text-stone-700">
+            <button
+              type="button"
+              onClick={() => navigate(`/add-item?itemId=${item.id}`)}
+              className="rounded-full bg-white px-4 py-2 text-sm font-medium text-stone-700"
+            >
               Edit
             </button>
           </article>

@@ -33,6 +33,10 @@ type AppState = {
   hasHydrated: boolean;
   hydrate: () => void;
   addInventoryItem: (input: AddInventoryInput) => void;
+  updateInventoryItem: (
+    itemId: string,
+    input: AddInventoryInput,
+  ) => void;
   addExpense: (input: AddExpenseInput) => void;
   addSale: (input: {
     itemId: string;
@@ -102,6 +106,43 @@ export const useAppStore = create<AppState>((set, get) => ({
     const sales = get().sales;
     persistState(inventory, expenses, sales);
     set({ inventory });
+  },
+  updateInventoryItem: (itemId, input) => {
+    const currentItem = get().inventory.find((entry) => entry.id === itemId);
+    if (!currentItem) {
+      return;
+    }
+
+    const inventory = get().inventory.map((entry) =>
+      entry.id === itemId
+        ? {
+            ...entry,
+            title: input.title,
+            costPence: input.costPence,
+            addedAt: input.addedAt,
+            platform: input.platform,
+            condition: input.condition,
+            notes: input.notes,
+          }
+        : entry,
+    );
+    const expenses = get().expenses;
+    const sales = get().sales.map((sale) =>
+      sale.itemId === itemId
+        ? {
+            ...sale,
+            title: input.title,
+            profitPence:
+              sale.salePricePence -
+              sale.platformFeePence -
+              sale.postageCostPence -
+              input.costPence,
+          }
+        : sale,
+    );
+
+    persistState(inventory, expenses, sales);
+    set({ inventory, sales });
   },
   addExpense: (input) => {
     const nextExpense: ExpenseItem = {

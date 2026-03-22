@@ -1,18 +1,30 @@
 import { FormEvent, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { parsePoundsToPence } from "../lib/sampleData";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { formatCurrency, parsePoundsToPence } from "../lib/sampleData";
 import { useAppStore } from "../store/useAppStore";
 import { PageShell } from "../ui/PageShell";
 
 export function AddItemPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const addInventoryItem = useAppStore((state) => state.addInventoryItem);
-  const [title, setTitle] = useState("");
-  const [purchasePrice, setPurchasePrice] = useState("");
-  const [purchaseDate, setPurchaseDate] = useState("");
-  const [platform, setPlatform] = useState<"eBay" | "Vinted" | "Depop">("eBay");
-  const [condition, setCondition] = useState<"New" | "Like new" | "Good" | "Fair">("Good");
-  const [notes, setNotes] = useState("");
+  const updateInventoryItem = useAppStore((state) => state.updateInventoryItem);
+  const inventory = useAppStore((state) => state.inventory);
+  const itemId = searchParams.get("itemId");
+  const editingItem =
+    itemId ? inventory.find((item) => item.id === itemId) ?? null : null;
+  const [title, setTitle] = useState(editingItem?.title ?? "");
+  const [purchasePrice, setPurchasePrice] = useState(
+    editingItem ? String(editingItem.costPence / 100) : "",
+  );
+  const [purchaseDate, setPurchaseDate] = useState(editingItem?.addedAt ?? "");
+  const [platform, setPlatform] = useState<"eBay" | "Vinted" | "Depop">(
+    editingItem?.platform ?? "eBay",
+  );
+  const [condition, setCondition] = useState<"New" | "Like new" | "Good" | "Fair">(
+    editingItem?.condition ?? "Good",
+  );
+  const [notes, setNotes] = useState(editingItem?.notes ?? "");
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -23,14 +35,20 @@ export function AddItemPage() {
       return;
     }
 
-    addInventoryItem({
+    const payload = {
       title: trimmedTitle,
       costPence: parsePoundsToPence(purchasePrice),
       addedAt: trimmedDate,
       platform,
       condition,
       notes: notes.trim(),
-    });
+    };
+
+    if (editingItem) {
+      updateInventoryItem(editingItem.id, payload);
+    } else {
+      addInventoryItem(payload);
+    }
 
     navigate("/inventory");
   }
@@ -38,9 +56,19 @@ export function AddItemPage() {
   return (
     <PageShell
       eyebrow="Add Item"
-      title="Fast entry while sourcing"
-      description="This screen should be optimized for speed on a phone. The first version should avoid overloading the form."
+      title={editingItem ? "Correct an inventory item" : "Fast entry while sourcing"}
+      description={
+        editingItem
+          ? "Keep mistake correction simple. Editing an item should update the inventory record and any linked sale profit calculations."
+          : "This screen should be optimized for speed on a phone. The first version should avoid overloading the form."
+      }
     >
+      {editingItem && editingItem.status === "Sold" ? (
+        <div className="mb-4 rounded-[24px] border border-amber-200 bg-amber-50 px-4 py-4 text-sm leading-6 text-amber-900">
+          This item has already been sold. Changing the purchase price will also
+          update the linked sale profit calculation.
+        </div>
+      ) : null}
       <form className="grid gap-4 md:grid-cols-2" onSubmit={handleSubmit}>
         <input
           type="text"
@@ -99,13 +127,14 @@ export function AddItemPage() {
         <div className="rounded-[24px] border border-dashed border-stone-300 bg-white px-4 py-6 text-sm text-stone-500 md:col-span-2">
           Photo upload placeholder. V1 should keep photo support constrained and
           storage-safe.
+          {editingItem ? ` Current cost: ${formatCurrency(editingItem.costPence)}.` : ""}
         </div>
         <button
           type="submit"
           disabled={!title.trim() || !purchaseDate.trim()}
           className="rounded-2xl bg-stone-900 px-4 py-3 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50 md:col-span-2"
         >
-          Save item
+          {editingItem ? "Save changes" : "Save item"}
         </button>
       </form>
     </PageShell>
